@@ -3,19 +3,19 @@ from agent.naiveAgent import NaiveAgent
 def timedelay(amount):
     import random
 
-    weights = [0.05, 0.1, 0.15, 0.5, 0.1, 0.1]
-    values = [0.5, 1, 2, 4, 8, 16]
+    weights = [0.01, 0.02, 0.04, 0.08, 0.16, 0.32, 0.37]
+    values = [0.5, 1, 2, 3, 5, 8, 11]
 
     delays = random.choices(values, weights, k=amount)
     return delays
 
 class AgentManager:
-    def __init__(self, amount):
-        self.amount = amount
+    def __init__(self):
         self.agents = []
-        self.delays = timedelay(self.amount)
 
-    def creat(self):
+    def creat(self, amount=1000):
+        self.amount = amount
+        self.delays = timedelay(self.amount)
         for i in range(self.amount):
             agent = NaiveAgent(i, self.delays[i])
             self.add_agent(agent)

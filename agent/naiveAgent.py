@@ -1,4 +1,5 @@
 import asyncio
+import json
 import queue
 from agent.base import BaseAgent
 
@@ -18,23 +19,29 @@ class NaiveAgent(BaseAgent):
         while True:
             if self.activeflag:
                 if self.inputflag:
-                    await self.process_input()
+                    while not self.inputqueue.empty():
+                        content = self.inputqueue.get()
+                        print(f'Agent {self.id} 收到: {content}')
                     self.inputflag = False
+
+                #TODO:
+                #    do something else
+
                 self.count += 1
                 self.outputqueue.put("第" + str(self.count) + "次发送消息。")
                 self.outputflag = True
                 await asyncio.sleep(self.delay)
     
-    async def process_input(self):
-        while not self.inputqueue.empty():
-            content = self.inputqueue.get()
-            print(f'Agent {self.id} 收到: {content}', end="")
-    
+    async def process_input(self, message):
+        self.inputqueue.put(message)
+        self.inputflag = True
+        
     async def process_output(self, writer):
         if self.outputflag:
             while not self.outputqueue.empty():
                 content = self.outputqueue.get()
-                message = str(self.id) + "$%$" + content + '\n'
+                data = {"id": self.id, "content": content}
+                message = json.dumps(data) + "\n"
                 writer.write(message.encode())
                 await writer.drain()
                 print(f'Agent {self.id} 发送: {content}')
